@@ -43,6 +43,10 @@ function formatDate(iso) {
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(new Date(iso));
 }
 
+function formatTime(iso) {
+  return new Intl.DateTimeFormat(undefined, { timeStyle: "short" }).format(new Date(iso));
+}
+
 function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -114,6 +118,49 @@ function badgeForInspection(result) {
   if (result === "Passed") return "success";
   if (result === "Out of service") return "danger";
   return "warn";
+}
+
+function renderWorkLog() {
+  const recentRecords = allRecords().slice(0, 5);
+  const workLogList = $("workLog");
+  const workLogCount = $("workLogCount");
+
+  workLogCount.textContent = state.loads.length + state.inspections.length;
+
+  if (recentRecords.length === 0) {
+    workLogList.innerHTML = '<div class="empty">No activity yet. Start by logging a load or inspection.</div>';
+    return;
+  }
+
+  workLogList.innerHTML = recentRecords.map((record) => {
+    let title = "";
+    let meta = "";
+    let icon = "";
+
+    if (record.recordType === "load") {
+      icon = "📦";
+      title = `${escapeHtml(record.material)} - ${Number(record.barrels).toLocaleString()} bbl`;
+      meta = `${escapeHtml(record.equipment)} · ${escapeHtml(record.lease || "No lease")}`;
+    } else if (record.recordType === "inspection") {
+      icon = "✅";
+      title = `Inspection: ${escapeHtml(record.equipment)}`;
+      meta = `Result: ${escapeHtml(record.result)}`;
+    } else {
+      icon = "📍";
+      title = `Location: ${escapeHtml(record.name)}`;
+      meta = `${escapeHtml(record.company || "No company")}`;
+    }
+
+    return `
+      <div class="work-log-item">
+        <div class="work-log-content">
+          <div class="work-log-title">${icon} ${title}</div>
+          <div class="work-log-meta">${meta}</div>
+        </div>
+        <div class="work-log-time">${formatTime(record.createdAt)}</div>
+      </div>
+    `;
+  }).join("");
 }
 
 function renderRecord(record) {
@@ -191,6 +238,7 @@ function renderLocations() {
 
 function renderAll() {
   renderMetrics();
+  renderWorkLog();
   renderHistory();
   renderLocations();
 }
@@ -232,6 +280,26 @@ function exportCsv() {
   showToast("CSV exported");
 }
 
+function addLiquidLoad() {
+  $("materialType").value = "water-based mud";
+  $("equipmentType").value = "80 bbl tanker";
+  $("barrels").value = "80";
+  updateCapacity();
+  document.querySelector(".tab-btn[data-tab='loads']").click();
+  $("companyName").focus();
+}
+
+function addSolidsLoad() {
+  $("materialType").value = "oil-based solids";
+  $("equipmentType").value = "79 bbl slinger";
+  $("barrels").value = "79";
+  updateCapacity();
+  document.querySelector(".tab-btn[data-tab='loads']").click();
+  $("companyName").focus();
+}
+
+// Event Listeners
+
 $("equipmentType").addEventListener("change", updateCapacity);
 
 $("loadForm").addEventListener("submit", async (event) => {
@@ -258,7 +326,8 @@ $("loadForm").addEventListener("submit", async (event) => {
     location
   });
 
-  $("loadNotes").value = "";
+  $("loadForm").reset();
+  $("barrels").value = "80";
   saveState("Load saved");
 });
 
@@ -342,10 +411,14 @@ $("clearData").addEventListener("click", () => {
   saveState("All app data erased");
 });
 
+// Quick action buttons
+$("quickAddLiquid").addEventListener("click", addLiquidLoad);
+$("quickAddSolids").addEventListener("click", addSolidsLoad);
+
 document.addEventListener("click", (event) => {
-  const tab = event.target.closest(".tab");
+  const tab = event.target.closest(".tab-btn");
   if (tab) {
-    document.querySelectorAll(".tab").forEach((button) => button.classList.toggle("active", button === tab));
+    document.querySelectorAll(".tab-btn").forEach((button) => button.classList.toggle("active", button === tab));
     document.querySelectorAll(".panel").forEach((panel) => panel.classList.toggle("active-panel", panel.id === tab.dataset.tab));
   }
 
