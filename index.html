@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#111827" />
+  <meta name="description" content="Offline oilfield load, inspection, and location tracker." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+  <title>Mud Slingin Assistant</title>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <p class="eyebrow">Offline Oilfield Tracker</p>
+      <h1>Mud Slingin Assistant</h1>
+    </div>
+    <button id="installButton" class="secondary hidden" type="button">Install App</button>
+  </header>
+
+  <main>
+    <section class="hero-grid" aria-label="Current totals">
+      <article class="metric-card">
+        <span>Liquid loads</span>
+        <strong id="liquidLoads">0</strong>
+        <small><span id="liquidBarrels">0</span> bbl</small>
+      </article>
+      <article class="metric-card">
+        <span>Solids loads</span>
+        <strong id="solidLoads">0</strong>
+        <small><span id="solidBarrels">0</span> bbl</small>
+      </article>
+      <article class="metric-card">
+        <span>Total barrels</span>
+        <strong id="totalBarrels">0</strong>
+        <small>All logged material</small>
+      </article>
+      <article class="metric-card">
+        <span>Inspections</span>
+        <strong id="inspectionCount">0</strong>
+        <small>Completed checks</small>
+      </article>
+    </section>
+
+    <nav class="tabs" aria-label="App sections">
+      <button class="tab active" data-tab="loads" type="button">Loads</button>
+      <button class="tab" data-tab="inspections" type="button">Inspections</button>
+      <button class="tab" data-tab="locations" type="button">Locations</button>
+      <button class="tab" data-tab="history" type="button">History</button>
+      <button class="tab" data-tab="settings" type="button">Settings</button>
+    </nav>
+
+    <section id="loads" class="panel active-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Fast Entry</p>
+          <h2>Log a load</h2>
+        </div>
+      </div>
+
+      <form id="loadForm" class="card form-grid">
+        <label>
+          Material
+          <select id="materialType" required>
+            <option value="water-based mud">Water-based mud</option>
+            <option value="oil-based mud">Oil-based mud</option>
+            <option value="water">Water</option>
+            <option value="oil-based cuttings">Oil-based cuttings</option>
+            <option value="water-based cuttings">Water-based cuttings</option>
+            <option value="oil-based solids">Oil-based solids</option>
+            <option value="other">Other</option>
+          </select>
+        </label>
+
+        <label>
+          Equipment
+          <select id="equipmentType" required>
+            <option value="80 bbl tanker">80 bbl tanker</option>
+            <option value="79 bbl slinger">79 bbl slinger</option>
+            <option value="custom">Custom capacity</option>
+          </select>
+        </label>
+
+        <label>
+          Barrels
+          <input id="barrels" type="number" min="0" step="0.1" value="80" required />
+        </label>
+
+        <label>
+          Lease / Rig
+          <input id="leaseName" type="text" placeholder="Example: H&P 388" />
+        </label>
+
+        <label>
+          Company
+          <input id="companyName" type="text" placeholder="Example: Briggs" />
+        </label>
+
+        <label>
+          Driver / Truck
+          <input id="truckName" type="text" placeholder="Truck or driver name" />
+        </label>
+
+        <label class="span-2">
+          Notes
+          <textarea id="loadNotes" rows="3" placeholder="Pit, destination, ticket number, condition, etc."></textarea>
+        </label>
+
+        <label class="checkbox-row span-2">
+          <input id="includeLocation" type="checkbox" checked />
+          Attach current GPS location when available
+        </label>
+
+        <button class="primary span-2" type="submit">Save Load</button>
+      </form>
+    </section>
+
+    <section id="inspections" class="panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Equipment Safety</p>
+          <h2>Log an inspection</h2>
+        </div>
+      </div>
+
+      <form id="inspectionForm" class="card form-grid">
+        <label>
+          Equipment
+          <select id="inspectionEquipment" required>
+            <option>80 bbl Tanker 1</option>
+            <option>80 bbl Tanker 2</option>
+            <option>79 bbl Slinger</option>
+            <option>John Deere 310SL Backhoe</option>
+            <option>Other</option>
+          </select>
+        </label>
+
+        <label>
+          Operator
+          <input id="inspectionOperator" type="text" placeholder="Name" />
+        </label>
+
+        <fieldset class="checklist span-2">
+          <legend>Checks completed</legend>
+          <label><input type="checkbox" name="inspectionCheck" value="Tires / pressure" /> Tires / pressure</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Engine oil" /> Engine oil</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Coolant" /> Coolant</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Hydraulic fluid" /> Hydraulic fluid</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Lights" /> Lights</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Leaks / damage" /> Leaks / damage</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Brakes / controls" /> Brakes / controls</label>
+          <label><input type="checkbox" name="inspectionCheck" value="Safety equipment" /> Safety equipment</label>
+        </fieldset>
+
+        <label>
+          Result
+          <select id="inspectionResult" required>
+            <option value="Passed">Passed</option>
+            <option value="Needs attention">Needs attention</option>
+            <option value="Out of service">Out of service</option>
+          </select>
+        </label>
+
+        <label>
+          Meter / mileage
+          <input id="meterReading" type="text" placeholder="Hours or miles" />
+        </label>
+
+        <label class="span-2">
+          Problems or notes
+          <textarea id="inspectionNotes" rows="3" placeholder="Document defects, fluids added, repairs needed, etc."></textarea>
+        </label>
+
+        <button class="primary span-2" type="submit">Save Inspection</button>
+      </form>
+    </section>
+
+    <section id="locations" class="panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Lease & Route Records</p>
+          <h2>Save a location</h2>
+        </div>
+      </div>
+
+      <form id="locationForm" class="card form-grid">
+        <label>
+          Location name
+          <input id="locationName" type="text" required placeholder="Lease, rig, yard, disposal, etc." />
+        </label>
+        <label>
+          Company
+          <input id="locationCompany" type="text" placeholder="Operator or customer" />
+        </label>
+        <label>
+          Latitude
+          <input id="latitude" type="number" step="any" placeholder="35.4676" />
+        </label>
+        <label>
+          Longitude
+          <input id="longitude" type="number" step="any" placeholder="-97.5164" />
+        </label>
+        <label class="span-2">
+          Notes
+          <textarea id="locationNotes" rows="3" placeholder="Gate code, directions, contact, hazards, etc."></textarea>
+        </label>
+        <button id="captureLocation" class="secondary" type="button">Use Current GPS</button>
+        <button class="primary" type="submit">Save Location</button>
+      </form>
+
+      <div id="savedLocations" class="stack"></div>
+    </section>
+
+    <section id="history" class="panel">
+      <div class="section-heading split-heading">
+        <div>
+          <p class="eyebrow">Records</p>
+          <h2>History</h2>
+        </div>
+        <div class="button-row">
+          <button id="exportCsv" class="secondary" type="button">Export CSV</button>
+          <button id="exportJson" class="secondary" type="button">Backup JSON</button>
+        </div>
+      </div>
+
+      <div class="card filters">
+        <label>
+          Show
+          <select id="historyFilter">
+            <option value="all">All records</option>
+            <option value="load">Loads only</option>
+            <option value="inspection">Inspections only</option>
+            <option value="location">Locations only</option>
+          </select>
+        </label>
+        <label>
+          Search
+          <input id="historySearch" type="search" placeholder="Search records" />
+        </label>
+      </div>
+
+      <div id="historyList" class="stack"></div>
+    </section>
+
+    <section id="settings" class="panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Data & Defaults</p>
+          <h2>Settings</h2>
+        </div>
+      </div>
+
+      <div class="card stack compact">
+        <label>
+          Default company
+          <input id="defaultCompany" type="text" placeholder="Example: Briggs" />
+        </label>
+        <label>
+          Default lease / rig
+          <input id="defaultLease" type="text" placeholder="Example: H&P 388" />
+        </label>
+        <button id="saveSettings" class="primary" type="button">Save Defaults</button>
+      </div>
+
+      <div class="card stack compact danger-zone">
+        <h3>Restore or erase data</h3>
+        <label class="file-label">
+          Restore JSON backup
+          <input id="importJson" type="file" accept="application/json" />
+        </label>
+        <button id="clearData" class="danger" type="button">Erase All App Data</button>
+      </div>
+
+      <p class="footer-note">Data is stored on this device. Export regular backups, because browsers are occasionally governed by chaos.</p>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
