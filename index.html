@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#111827" />
+  <meta name="theme-color" content="#0f172a" />
   <meta name="description" content="Offline oilfield load, inspection, and location tracker." />
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="icons/icon-192.png" />
@@ -13,272 +13,342 @@
 </head>
 <body>
   <header class="app-header">
-    <div>
+    <div class="header-content">
       <p class="eyebrow">Offline Oilfield Tracker</p>
       <h1>Mud Slingin Assistant</h1>
     </div>
-    <button id="installButton" class="secondary hidden" type="button">Install App</button>
+    <button id="installButton" class="btn-install hidden" type="button" aria-label="Install app">📱 Install</button>
   </header>
 
-  <main>
-    <section class="hero-grid" aria-label="Current totals">
-      <article class="metric-card">
-        <span>Liquid loads</span>
-        <strong id="liquidLoads">0</strong>
-        <small><span id="liquidBarrels">0</span> bbl</small>
-      </article>
-      <article class="metric-card">
-        <span>Solids loads</span>
-        <strong id="solidLoads">0</strong>
-        <small><span id="solidBarrels">0</span> bbl</small>
-      </article>
-      <article class="metric-card">
-        <span>Total barrels</span>
-        <strong id="totalBarrels">0</strong>
-        <small>All logged material</small>
-      </article>
-      <article class="metric-card">
-        <span>Inspections</span>
-        <strong id="inspectionCount">0</strong>
-        <small>Completed checks</small>
-      </article>
+  <main class="main-container">
+    <!-- Dashboard: Primary Metrics & Quick Actions -->
+    <section class="dashboard" aria-label="Current totals and quick actions">
+      <div class="metrics-grid">
+        <article class="metric-card metric-liquid">
+          <span class="metric-label">Liquid Loads</span>
+          <strong class="metric-number" id="liquidLoads">0</strong>
+          <small class="metric-unit"><span id="liquidBarrels">0</span> bbl</small>
+        </article>
+        <article class="metric-card metric-solids">
+          <span class="metric-label">Solids Loads</span>
+          <strong class="metric-number" id="solidLoads">0</strong>
+          <small class="metric-unit"><span id="solidBarrels">0</span> bbl</small>
+        </article>
+        <article class="metric-card metric-total">
+          <span class="metric-label">Total Barrels</span>
+          <strong class="metric-number" id="totalBarrels">0</strong>
+          <small class="metric-unit">All material</small>
+        </article>
+        <article class="metric-card metric-inspection">
+          <span class="metric-label">Inspections</span>
+          <strong class="metric-number" id="inspectionCount">0</strong>
+          <small class="metric-unit">Completed</small>
+        </article>
+      </div>
+
+      <div class="quick-actions">
+        <button id="quickAddLiquid" class="btn-primary btn-lg" type="button" aria-label="Add liquid load">
+          ➕ Add Liquid Load
+        </button>
+        <button id="quickAddSolids" class="btn-primary btn-lg" type="button" aria-label="Add solids load">
+          ➕ Add Solids Load
+        </button>
+      </div>
     </section>
 
-    <nav class="tabs" aria-label="App sections">
-      <button class="tab active" data-tab="loads" type="button">Loads</button>
-      <button class="tab" data-tab="inspections" type="button">Inspections</button>
-      <button class="tab" data-tab="locations" type="button">Locations</button>
-      <button class="tab" data-tab="history" type="button">History</button>
-      <button class="tab" data-tab="settings" type="button">Settings</button>
+    <!-- Work Log: Recent Activity -->
+    <section class="work-log-section" aria-label="Recent activity">
+      <div class="section-header">
+        <h2>Recent Activity</h2>
+        <span class="badge-count" id="workLogCount">0</span>
+      </div>
+      <div id="workLog" class="work-log-list"></div>
+    </section>
+
+    <!-- Navigation Tabs -->
+    <nav class="tabs-nav" aria-label="App sections">
+      <button class="tab-btn active" data-tab="loads" type="button">Loads</button>
+      <button class="tab-btn" data-tab="inspections" type="button">Inspections</button>
+      <button class="tab-btn" data-tab="locations" type="button">Locations</button>
+      <button class="tab-btn" data-tab="history" type="button">History</button>
+      <button class="tab-btn" data-tab="settings" type="button">Settings</button>
     </nav>
 
+    <!-- Loads Panel -->
     <section id="loads" class="panel active-panel">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Fast Entry</p>
-          <h2>Log a load</h2>
-        </div>
+      <div class="section-header">
+        <h2>Log a Load</h2>
       </div>
 
-      <form id="loadForm" class="card form-grid">
-        <label>
-          Material
-          <select id="materialType" required>
-            <option value="water-based mud">Water-based mud</option>
-            <option value="oil-based mud">Oil-based mud</option>
-            <option value="water">Water</option>
-            <option value="oil-based cuttings">Oil-based cuttings</option>
-            <option value="water-based cuttings">Water-based cuttings</option>
-            <option value="oil-based solids">Oil-based solids</option>
-            <option value="other">Other</option>
-          </select>
-        </label>
+      <form id="loadForm" class="form-card">
+        <fieldset class="form-group">
+          <legend>Load Details</legend>
 
-        <label>
-          Equipment
-          <select id="equipmentType" required>
-            <option value="80 bbl tanker">80 bbl tanker</option>
-            <option value="79 bbl slinger">79 bbl slinger</option>
-            <option value="custom">Custom capacity</option>
-          </select>
-        </label>
+          <label class="form-control">
+            <span class="label-text">Material Type</span>
+            <select id="materialType" required aria-label="Material type">
+              <option value="">Select material...</option>
+              <option value="water-based mud">Water-based mud</option>
+              <option value="oil-based mud">Oil-based mud</option>
+              <option value="water">Water</option>
+              <option value="oil-based cuttings">Oil-based cuttings</option>
+              <option value="water-based cuttings">Water-based cuttings</option>
+              <option value="oil-based solids">Oil-based solids</option>
+              <option value="other">Other</option>
+            </select>
+          </label>
 
-        <label>
-          Barrels
-          <input id="barrels" type="number" min="0" step="0.1" value="80" required />
-        </label>
+          <label class="form-control">
+            <span class="label-text">Equipment</span>
+            <select id="equipmentType" required aria-label="Equipment type">
+              <option value="">Select equipment...</option>
+              <option value="80 bbl tanker">80 bbl tanker</option>
+              <option value="79 bbl slinger">79 bbl slinger</option>
+              <option value="custom">Custom capacity</option>
+            </select>
+          </label>
 
-        <label>
-          Lease / Rig
-          <input id="leaseName" type="text" placeholder="Example: H&P 388" />
-        </label>
+          <label class="form-control">
+            <span class="label-text">Barrels</span>
+            <input id="barrels" type="number" min="0" step="0.1" value="80" required aria-label="Number of barrels" />
+          </label>
 
-        <label>
-          Company
-          <input id="companyName" type="text" placeholder="Example: Briggs" />
-        </label>
+          <label class="form-control">
+            <span class="label-text">Lease / Rig</span>
+            <input id="leaseName" type="text" placeholder="Example: H&P 388" aria-label="Lease or rig name" />
+          </label>
 
-        <label>
-          Driver / Truck
-          <input id="truckName" type="text" placeholder="Truck or driver name" />
-        </label>
+          <label class="form-control">
+            <span class="label-text">Company</span>
+            <input id="companyName" type="text" placeholder="Example: Briggs" aria-label="Company name" />
+          </label>
 
-        <label class="span-2">
-          Notes
-          <textarea id="loadNotes" rows="3" placeholder="Pit, destination, ticket number, condition, etc."></textarea>
-        </label>
+          <label class="form-control">
+            <span class="label-text">Driver / Truck</span>
+            <input id="truckName" type="text" placeholder="Truck or driver name" aria-label="Driver or truck name" />
+          </label>
 
-        <label class="checkbox-row span-2">
-          <input id="includeLocation" type="checkbox" checked />
-          Attach current GPS location when available
-        </label>
+          <label class="form-control full-width">
+            <span class="label-text">Notes</span>
+            <textarea id="loadNotes" rows="3" placeholder="Pit, destination, ticket number, condition, etc." aria-label="Additional notes"></textarea>
+          </label>
 
-        <button class="primary span-2" type="submit">Save Load</button>
-      </form>
-    </section>
-
-    <section id="inspections" class="panel">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Equipment Safety</p>
-          <h2>Log an inspection</h2>
-        </div>
-      </div>
-
-      <form id="inspectionForm" class="card form-grid">
-        <label>
-          Equipment
-          <select id="inspectionEquipment" required>
-            <option>80 bbl Tanker 1</option>
-            <option>80 bbl Tanker 2</option>
-            <option>79 bbl Slinger</option>
-            <option>John Deere 310SL Backhoe</option>
-            <option>Other</option>
-          </select>
-        </label>
-
-        <label>
-          Operator
-          <input id="inspectionOperator" type="text" placeholder="Name" />
-        </label>
-
-        <fieldset class="checklist span-2">
-          <legend>Checks completed</legend>
-          <label><input type="checkbox" name="inspectionCheck" value="Tires / pressure" /> Tires / pressure</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Engine oil" /> Engine oil</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Coolant" /> Coolant</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Hydraulic fluid" /> Hydraulic fluid</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Lights" /> Lights</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Leaks / damage" /> Leaks / damage</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Brakes / controls" /> Brakes / controls</label>
-          <label><input type="checkbox" name="inspectionCheck" value="Safety equipment" /> Safety equipment</label>
+          <label class="form-checkbox">
+            <input id="includeLocation" type="checkbox" checked aria-label="Attach GPS location" />
+            <span>Attach current GPS location when available</span>
+          </label>
         </fieldset>
 
-        <label>
-          Result
-          <select id="inspectionResult" required>
-            <option value="Passed">Passed</option>
-            <option value="Needs attention">Needs attention</option>
-            <option value="Out of service">Out of service</option>
-          </select>
-        </label>
-
-        <label>
-          Meter / mileage
-          <input id="meterReading" type="text" placeholder="Hours or miles" />
-        </label>
-
-        <label class="span-2">
-          Problems or notes
-          <textarea id="inspectionNotes" rows="3" placeholder="Document defects, fluids added, repairs needed, etc."></textarea>
-        </label>
-
-        <button class="primary span-2" type="submit">Save Inspection</button>
+        <div class="form-actions">
+          <button class="btn-primary btn-lg" type="submit">💾 Save Load</button>
+          <button class="btn-secondary" type="reset">Clear</button>
+        </div>
       </form>
     </section>
 
+    <!-- Inspections Panel -->
+    <section id="inspections" class="panel">
+      <div class="section-header">
+        <h2>Log an Inspection</h2>
+      </div>
+
+      <form id="inspectionForm" class="form-card">
+        <fieldset class="form-group">
+          <legend>Equipment Inspection</legend>
+
+          <label class="form-control">
+            <span class="label-text">Equipment</span>
+            <select id="inspectionEquipment" required aria-label="Equipment for inspection">
+              <option value="">Select equipment...</option>
+              <option>80 bbl Tanker 1</option>
+              <option>80 bbl Tanker 2</option>
+              <option>79 bbl Slinger</option>
+              <option>John Deere 310SL Backhoe</option>
+              <option>Other</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Operator</span>
+            <input id="inspectionOperator" type="text" placeholder="Name" aria-label="Operator name" />
+          </label>
+
+          <fieldset class="checklist-group">
+            <legend class="label-text">Checks Completed</legend>
+            <div class="checkbox-grid">
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Tires / pressure" />
+                <span>Tires / pressure</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Engine oil" />
+                <span>Engine oil</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Coolant" />
+                <span>Coolant</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Hydraulic fluid" />
+                <span>Hydraulic fluid</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Lights" />
+                <span>Lights</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Leaks / damage" />
+                <span>Leaks / damage</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Brakes / controls" />
+                <span>Brakes / controls</span>
+              </label>
+              <label class="form-checkbox">
+                <input type="checkbox" name="inspectionCheck" value="Safety equipment" />
+                <span>Safety equipment</span>
+              </label>
+            </div>
+          </fieldset>
+
+          <label class="form-control">
+            <span class="label-text">Result</span>
+            <select id="inspectionResult" required aria-label="Inspection result">
+              <option value="">Select result...</option>
+              <option value="Passed">✅ Passed</option>
+              <option value="Needs attention">⚠️ Needs attention</option>
+              <option value="Out of service">❌ Out of service</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Meter / Mileage</span>
+            <input id="meterReading" type="text" placeholder="Hours or miles" aria-label="Meter or mileage reading" />
+          </label>
+
+          <label class="form-control full-width">
+            <span class="label-text">Problems or Notes</span>
+            <textarea id="inspectionNotes" rows="3" placeholder="Document defects, fluids added, repairs needed, etc." aria-label="Inspection notes"></textarea>
+          </label>
+        </fieldset>
+
+        <div class="form-actions">
+          <button class="btn-primary btn-lg" type="submit">💾 Save Inspection</button>
+          <button class="btn-secondary" type="reset">Clear</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- Locations Panel -->
     <section id="locations" class="panel">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Lease & Route Records</p>
-          <h2>Save a location</h2>
-        </div>
+      <div class="section-header">
+        <h2>Save a Location</h2>
       </div>
 
-      <form id="locationForm" class="card form-grid">
-        <label>
-          Location name
-          <input id="locationName" type="text" required placeholder="Lease, rig, yard, disposal, etc." />
-        </label>
-        <label>
-          Company
-          <input id="locationCompany" type="text" placeholder="Operator or customer" />
-        </label>
-        <label>
-          Latitude
-          <input id="latitude" type="number" step="any" placeholder="35.4676" />
-        </label>
-        <label>
-          Longitude
-          <input id="longitude" type="number" step="any" placeholder="-97.5164" />
-        </label>
-        <label class="span-2">
-          Notes
-          <textarea id="locationNotes" rows="3" placeholder="Gate code, directions, contact, hazards, etc."></textarea>
-        </label>
-        <button id="captureLocation" class="secondary" type="button">Use Current GPS</button>
-        <button class="primary" type="submit">Save Location</button>
+      <form id="locationForm" class="form-card">
+        <fieldset class="form-group">
+          <legend>Location Details</legend>
+
+          <label class="form-control">
+            <span class="label-text">Location Name</span>
+            <input id="locationName" type="text" required placeholder="Lease, rig, yard, disposal, etc." aria-label="Location name" />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Company</span>
+            <input id="locationCompany" type="text" placeholder="Operator or customer" aria-label="Company name" />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Latitude</span>
+            <input id="latitude" type="number" step="any" placeholder="35.4676" aria-label="Latitude" />
+          </label>
+
+          <label class="form-control">
+            <span class="label-text">Longitude</span>
+            <input id="longitude" type="number" step="any" placeholder="-97.5164" aria-label="Longitude" />
+          </label>
+
+          <label class="form-control full-width">
+            <span class="label-text">Notes</span>
+            <textarea id="locationNotes" rows="3" placeholder="Gate code, directions, contact, hazards, etc." aria-label="Location notes"></textarea>
+          </label>
+        </fieldset>
+
+        <div class="form-actions">
+          <button id="captureLocation" class="btn-secondary btn-lg" type="button">📍 Use Current GPS</button>
+          <button class="btn-primary btn-lg" type="submit">💾 Save Location</button>
+        </div>
       </form>
 
-      <div id="savedLocations" class="stack"></div>
+      <div id="savedLocations" class="records-list"></div>
     </section>
 
+    <!-- History Panel -->
     <section id="history" class="panel">
-      <div class="section-heading split-heading">
-        <div>
-          <p class="eyebrow">Records</p>
-          <h2>History</h2>
-        </div>
-        <div class="button-row">
-          <button id="exportCsv" class="secondary" type="button">Export CSV</button>
-          <button id="exportJson" class="secondary" type="button">Backup JSON</button>
+      <div class="section-header">
+        <h2>History</h2>
+        <div class="export-buttons">
+          <button id="exportCsv" class="btn-secondary" type="button">📊 CSV</button>
+          <button id="exportJson" class="btn-secondary" type="button">💾 JSON</button>
         </div>
       </div>
 
-      <div class="card filters">
-        <label>
-          Show
-          <select id="historyFilter">
+      <div class="filter-bar">
+        <label class="filter-control">
+          <span class="label-text">Filter</span>
+          <select id="historyFilter" aria-label="Filter records by type">
             <option value="all">All records</option>
             <option value="load">Loads only</option>
             <option value="inspection">Inspections only</option>
             <option value="location">Locations only</option>
           </select>
         </label>
-        <label>
-          Search
-          <input id="historySearch" type="search" placeholder="Search records" />
+        <label class="filter-control">
+          <span class="label-text">Search</span>
+          <input id="historySearch" type="search" placeholder="Search records..." aria-label="Search records" />
         </label>
       </div>
 
-      <div id="historyList" class="stack"></div>
+      <div id="historyList" class="records-list"></div>
     </section>
 
+    <!-- Settings Panel -->
     <section id="settings" class="panel">
-      <div class="section-heading">
-        <div>
-          <p class="eyebrow">Data & Defaults</p>
-          <h2>Settings</h2>
-        </div>
+      <div class="section-header">
+        <h2>Settings</h2>
       </div>
 
-      <div class="card stack compact">
-        <label>
-          Default company
-          <input id="defaultCompany" type="text" placeholder="Example: Briggs" />
+      <div class="settings-card">
+        <h3>Default Values</h3>
+        <label class="form-control">
+          <span class="label-text">Default Company</span>
+          <input id="defaultCompany" type="text" placeholder="Example: Briggs" aria-label="Default company" />
         </label>
-        <label>
-          Default lease / rig
-          <input id="defaultLease" type="text" placeholder="Example: H&P 388" />
+        <label class="form-control">
+          <span class="label-text">Default Lease / Rig</span>
+          <input id="defaultLease" type="text" placeholder="Example: H&P 388" aria-label="Default lease or rig" />
         </label>
-        <button id="saveSettings" class="primary" type="button">Save Defaults</button>
+        <button id="saveSettings" class="btn-primary btn-lg" type="button">💾 Save Defaults</button>
       </div>
 
-      <div class="card stack compact danger-zone">
-        <h3>Restore or erase data</h3>
-        <label class="file-label">
-          Restore JSON backup
-          <input id="importJson" type="file" accept="application/json" />
+      <div class="settings-card danger-zone">
+        <h3>Data Management</h3>
+        <label class="file-input-label">
+          <input id="importJson" type="file" accept="application/json" aria-label="Import JSON backup" />
+          <span class="btn-secondary btn-lg">📂 Restore Backup</span>
         </label>
-        <button id="clearData" class="danger" type="button">Erase All App Data</button>
+        <button id="clearData" class="btn-danger btn-lg" type="button">🗑️ Erase All Data</button>
       </div>
 
-      <p class="footer-note">Data is stored on this device. Export regular backups, because browsers are occasionally governed by chaos.</p>
+      <p class="footer-text">Data is stored locally on this device. Export regular backups for safety.</p>
     </section>
   </main>
 
-  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <!-- Toast Notifications -->
+  <div id="toast" class="toast-notification" role="status" aria-live="polite" aria-atomic="true"></div>
 
+  <!-- Scripts -->
   <script src="app.js" defer></script>
 </body>
 </html>
